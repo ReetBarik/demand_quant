@@ -1,7 +1,18 @@
 import pandas as pd
 
-file1 = pd.read_excel('master.xlsx')
+master_df = None
+unsold_df = None
+f = []
 
+def read_files():
+    global master_df, unsold_df
+    master_df = pd.read_excel('master.xlsx')
+    unsold_df = pd.read_excel('Unsold.xlsx')
+    for i in range(1, 9):
+        filename = f'l{i}.xlsx'
+        df = pd.read_excel(filename, header=None, names=['Id'])
+        d = df.to_dict()['Id']
+        f.append(Franchise(i, list(d.values())))
 
 OFFSET = 17
 LIMIT = 16
@@ -38,31 +49,32 @@ class Franchise:
     def update_list(self):
         pass
 
-unsold_df = pd.read_excel('Unsold.xlsx')
+
+def get_player_info(idx):
+    return master_df.iloc[idx].to_dict()
+
+
 values = {}
-for pid in unsold_df['Id']:
-    values[pid] = 0
+
+def init():
+    for pid in unsold_df['Id']:
+        values[pid] = 0
 
 
-f = []
-df_lst = []
-for i in range(1, 9):
-    filename = f'l{i}.xlsx'
-    df = pd.read_excel(filename, header=None, names=['Id'])
-    df_lst.append(df)
-    d = df.to_dict()['Id']
-    f.append(Franchise(i, list(d.values())))
+def get_next_player():
+    best_player_id = min(values.items(), key=lambda x: x[1])[0]
+    print(f'next player id: {best_player_id}')
+    u_df = unsold_df.drop(unsold_df.index[[best_player_id]])
+    print(u_df.head(10))
+    print('----------')
+    print(unsold_df.head(10))
 
 
-best_player_id = min(values.items(), key=lambda x: x[1])[0]
-print(f'next player id: {best_player_id}')
-u_df = unsold_df.drop(unsold_df.index[[best_player_id]])
-print(u_df.head(10))
-print('----------')
-print(unsold_df.head(10))
+def main():
+    read_files()
+    init()
+    print(get_player_info(1))
 
-# def main():
 #
-#
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
